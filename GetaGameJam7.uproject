@@ -7,12 +7,40 @@
 		{
 			"Name": "GetaGameJam7",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Gauntlet",
+				"FunctionalTesting"
+			]
 		}
 	],
 	"Plugins": [
 		{
 			"Name": "Paper2D",
+			"Enabled": true
+		},
+		{
+			"Name": "Gauntlet",
+			"Enabled": true
+		},
+		{
+			"Name": "RuntimeTests",
+			"Enabled": true
+		},
+		{
+			"Name": "ScreenshotTools",
+			"Enabled": true
+		},
+		{
+			"Name": "FunctionalTestingEditor",
+			"Enabled": true
+		},
+		{
+			"Name": "FbxAutomationTestBuilder",
+			"Enabled": true
+		},
+		{
+			"Name": "EditorTests",
 			"Enabled": true
 		}
 	]
