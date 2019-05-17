@@ -15,5 +15,12 @@ AGetaGameJam7GameMode::AGetaGameJam7GameMode()
 void AGetaGameJam7GameMode::Reset_Implementation()
 {
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetInputMode(FInputModeGameOnly());
-	UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)->Reset();
+	//UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)->Reset();
+
+	TArray<AActor*> Actors;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName(TEXT("GameActor")), Actors);
+	for (AActor* Actor : Actors)
+	{
+		Actor->Reset();
+	}
 }

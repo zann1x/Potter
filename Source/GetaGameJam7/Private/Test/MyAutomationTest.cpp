@@ -2,17 +2,22 @@
 
 
 #include "Misc/AutomationTest.h"
+#include "Tests/AutomationCommon.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(MyAutomationTest, "MyTestGroup.MyAutomationTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 bool MyAutomationTest::RunTest(const FString& Parameters)
 {
-	return false;
+
+	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(MyAutomationTestTwo, "MyTestGroup.MyAutomationTestTwo", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(MySampleTest, "MyTestGroup.MySampleTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::ClientContext | EAutomationTestFlags::ProductFilter)
 
-bool MyAutomationTestTwo::RunTest(const FString& Parameters)
+bool MySampleTest::RunTest(const FString& Parameters)
 {
+	TestTrue("Load the game map", AutomationOpenMap("/Game/Maps/Map0"));
+	TestTrue("Load the main menu map", AutomationOpenMap("/Game/Maps/Map_MainMenu"));
+
 	return true;
 }

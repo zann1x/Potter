@@ -6,8 +6,6 @@
 #include "PaperCharacter.h"
 #include "GetaGameJam7Character.generated.h"
 
-class UTextRenderComponent;
-
 UENUM(BlueprintType)
 enum class AnimationState : uint8
 {
@@ -75,7 +73,7 @@ protected:
 
 	// BlueprintNativeEvent to reset all player variables
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = FlowFlow)
-	void Reset();
+	void Reset() override;
 
 	/** Called to choose the correct animation to play based on the character's movement state */
 	void UpdateAnimation();

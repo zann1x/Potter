@@ -9,7 +9,6 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"Gauntlet",
 				"FunctionalTesting",
 				"Engine"
 			]
@@ -18,10 +17,6 @@
 	"Plugins": [
 		{
 			"Name": "Paper2D",
-			"Enabled": true
-		},
-		{
-			"Name": "Gauntlet",
 			"Enabled": true
 		},
 		{
