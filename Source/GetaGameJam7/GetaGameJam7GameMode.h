@@ -18,4 +18,8 @@ class AGetaGameJam7GameMode : public AGameModeBase
 	GENERATED_BODY()
 public:
 	AGetaGameJam7GameMode();
+
+	// Called when the game has to be reset to its initial values
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category=Default)
+	void Reset();
 };

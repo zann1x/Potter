@@ -10,7 +10,8 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"Gauntlet",
-				"FunctionalTesting"
+				"FunctionalTesting",
+				"Engine"
 			]
 		}
 	],

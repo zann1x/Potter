@@ -38,7 +38,6 @@ class AGetaGameJam7Character : public APaperCharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
-	UTextRenderComponent* TextComponent;
 	virtual void Tick(float DeltaSeconds) override;
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
@@ -61,8 +60,22 @@ protected:
 	class UPaperFlipbook* WinAnimation;
 
 	// The water level the flower is currently at
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Flower)
-	float WaterLevel = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FlowFlow)
+	float WaterLevel;
+
+	const float MaxWaterLevel = 1.0f;
+
+	// BlueprintNativeEvent to kill the player
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category=FlowFlow)
+	void Kill();
+
+	// BlueprintNativeEvent to execute when the player has won
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = FlowFlow)
+	void Win();
+
+	// BlueprintNativeEvent to reset all player variables
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = FlowFlow)
+	void Reset();
 
 	/** Called to choose the correct animation to play based on the character's movement state */
 	void UpdateAnimation();
@@ -70,7 +83,7 @@ protected:
 	/** Called for side to side input */
 	void MoveRight(float Value);
 
-	void UpdateCharacter();
+	void UpdateCharacter(float DeltaSeconds);
 
 	/** Handle touch inputs. */
 	void TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location);

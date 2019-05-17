@@ -2,9 +2,18 @@
 
 #include "GetaGameJam7GameMode.h"
 #include "GetaGameJam7Character.h"
+#include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
 
 AGetaGameJam7GameMode::AGetaGameJam7GameMode()
 {
 	// Set default pawn class to our character
 	DefaultPawnClass = AGetaGameJam7Character::StaticClass();	
+}
+
+void AGetaGameJam7GameMode::Reset_Implementation()
+{
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetInputMode(FInputModeGameOnly());
+	UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)->Reset();
 }

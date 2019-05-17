@@ -2,13 +2,15 @@
 
 #include "GetaGameJam7Character.h"
 #include "PaperFlipbookComponent.h"
-#include "Components/TextRenderComponent.h"
+#include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
-#include "GameFramework/SpringArmComponent.h"
+#include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
-#include "Camera/CameraComponent.h"
+#include "GameFramework/PlayerStart.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY_STATIC(SideScrollerCharacter, Log, All);
 
@@ -23,8 +25,8 @@ AGetaGameJam7Character::AGetaGameJam7Character()
 	bUseControllerRotationRoll = false;
 
 	// Set the size of our collision capsule.
-	GetCapsuleComponent()->SetCapsuleHalfHeight(96.0f);
-	GetCapsuleComponent()->SetCapsuleRadius(40.0f);
+	GetCapsuleComponent()->SetCapsuleHalfHeight(30.0f);
+	GetCapsuleComponent()->SetCapsuleRadius(3.0f);
 
 	// Create a camera boom attached to the root (capsule)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -39,7 +41,7 @@ AGetaGameJam7Character::AGetaGameJam7Character()
 	// Create an orthographic camera (no perspective) and attach it to the boom
 	SideViewCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("SideViewCamera"));
 	SideViewCameraComponent->ProjectionMode = ECameraProjectionMode::Orthographic;
-	SideViewCameraComponent->OrthoWidth = 2048.0f;
+	SideViewCameraComponent->OrthoWidth = 640.0f;
 	SideViewCameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 
 	// Prevent all automatic rotation behavior on the camera, character, and camera component
@@ -51,10 +53,11 @@ AGetaGameJam7Character::AGetaGameJam7Character()
 	// Configure character movement
 	GetCharacterMovement()->GravityScale = 2.0f;
 	GetCharacterMovement()->AirControl = 0.80f;
-	GetCharacterMovement()->JumpZVelocity = 1000.f;
+	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->GroundFriction = 3.0f;
-	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+	GetCharacterMovement()->MaxWalkSpeed = 350.0f;
 	GetCharacterMovement()->MaxFlySpeed = 600.0f;
+	GetCharacterMovement()->MaxStepHeight = 2.0f;
 
 	// Lock character motion onto the XZ plane, so the character can't move in or out of the screen
 	GetCharacterMovement()->bConstrainToPlane = true;
@@ -65,15 +68,12 @@ AGetaGameJam7Character::AGetaGameJam7Character()
 	// behavior on the edge of a ledge versus inclines by setting this to true or false
 	GetCharacterMovement()->bUseFlatBaseForFloorChecks = true;
 
-    // 	TextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("IncarGear"));
-    // 	TextComponent->SetRelativeScale3D(FVector(3.0f, 3.0f, 3.0f));
-    // 	TextComponent->SetRelativeLocation(FVector(35.0f, 5.0f, 20.0f));
-    // 	TextComponent->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
-    // 	TextComponent->SetupAttachment(RootComponent);
-
 	// Enable replication on the Sprite component so animations show up when networked
 	GetSprite()->SetIsReplicated(true);
 	bReplicates = true;
+
+	// Set other defaults
+	WaterLevel = MaxWaterLevel;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -81,8 +81,7 @@ AGetaGameJam7Character::AGetaGameJam7Character()
 
 void AGetaGameJam7Character::UpdateAnimation()
 {
-	const FVector PlayerVelocity = GetVelocity();
-	const float PlayerSpeedSqr = PlayerVelocity.SizeSquared();
+	const float PlayerSpeedSqr = GetVelocity().SizeSquared();
 
 	// Are we moving or standing still?
 	if (AnimState != AnimationState::DEAD && AnimState != AnimationState::POTTED)
@@ -120,7 +119,7 @@ void AGetaGameJam7Character::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	UpdateCharacter();	
+	UpdateCharacter(DeltaSeconds);	
 }
 
 
@@ -158,8 +157,44 @@ void AGetaGameJam7Character::TouchStopped(const ETouchIndex::Type FingerIndex, c
 	StopJumping();
 }
 
-void AGetaGameJam7Character::UpdateCharacter()
+void AGetaGameJam7Character::Kill_Implementation()
 {
+	AnimState = AnimationState::DEAD;
+	DisableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetCharacter()->GetCharacterMovement()->Velocity = FVector(0.0f, 0.0f, 0.0f);
+	UpdateAnimation();
+}
+
+void AGetaGameJam7Character::Win_Implementation()
+{
+	AnimState = AnimationState::POTTED;
+	DisableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetCharacter()->GetCharacterMovement()->Velocity = FVector(0.0f, 0.0f, 0.0f);
+	UpdateAnimation();
+}
+
+void AGetaGameJam7Character::Reset_Implementation()
+{
+	WaterLevel = MaxWaterLevel;
+	AnimState = AnimationState::IDLE;
+	EnableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	TArray<AActor*> Actors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), Actors);
+	SetActorLocation(Actors[0]->GetActorLocation(), false, nullptr, ETeleportType::ResetPhysics);
+	SetActorTickEnabled(true);
+}
+
+void AGetaGameJam7Character::UpdateCharacter(float DeltaSeconds)
+{
+	if (AnimState != AnimationState::DEAD)
+	{
+		WaterLevel -= (DeltaSeconds / 15.0f);
+		if (WaterLevel <= 0.0f)
+		{
+			Kill();
+		}
+	}
+	
 	// Update animation to match the motion
 	UpdateAnimation();
 
