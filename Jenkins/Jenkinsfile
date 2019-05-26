@@ -1,3 +1,40 @@
+import groovy.json.JsonSlurper
+import groovy.xml.MarkupBuilder
+
+def convertUnitTestsReport() {
+    def json = readFile file: "${RO_PATH}\\index.json", encoding: "UTF-8"
+    // Needed because the JSON is encoded in UTF-8 with BOM
+
+    json = json.replace( "\uFEFF", "" );
+
+    def xml_content = getJUnitXMLContentFromJSON( json )
+
+    writeFile file: "${RO_PATH}\\junit.xml", text: xml_content.toString()
+}
+
+@NonCPS
+def getJUnitXMLContentFromJSON( String json_content ) {
+    def j = new JsonSlurper().parseText( json_content )
+    
+    def sw = new StringWriter()
+    def builder = new MarkupBuilder( sw )
+
+    builder.doubleQuotes = true
+    builder.mkp.xmlDeclaration version: "1.0", encoding: "utf-8"
+
+    builder.testsuite( tests: j.succeeded + j.failed, failures: j.failed, time: j.totalDuration ) {
+        for ( test in j.tests ) {
+            builder.testcase( name: test.testDisplayName, classname: test.fullTestPath, status: test.state ) {
+                for ( entry in test.entries ) { 
+                    builder.failure( message: entry.event.message, type: entry.event.type, entry.filename + " " + entry.lineNumber )
+                }
+            }
+        }
+    } 
+
+    return sw.toString()
+}
+
 pipeline {
   agent any
   parameters {
@@ -31,6 +68,7 @@ pipeline {
     stage('Run tests') {
       steps {
         bat 'Jenkins\\Test\\RunMyTests.bat'
+        convertUnitTestsReport()
       }
     }
   }
