@@ -1,0 +1,48 @@
+pipeline {
+  agent any
+  parameters {
+    string(name: 'JENKINS_WS', defaultValue: 'C:\\Program Files (x86)\\Jenkins\\workspace\\Potter', description: 'Location of the Jenkins workspace folder of this project')
+    string(name: 'JENKINS_BUILD', defaultValue: 'C:\\Program Files (x86)\\Jenkins\\workspace\\Builds\\Potter', description: 'Location of the Jenkins build folder of this project')
+    string(name: 'JENKINS_ARCHIVE', defaultValue: 'C:\\Program Files (x86)\\Jenkins\\workspace\\Archive\\Potter', description: 'Location of the Jenkins archive folder of this project')
+    string(name: 'UE_LOC', defaultValue: 'C:\\Program Files\\Epic Games\\UE_4.22', description: 'Location of the Unreal Engine installation')
+    string(name: 'RO_PATH', defaultValue: 'C:\\Program Files (x86)\\Jenkins\\workspace\\Test\\Automation\\TestReportOutput', description: 'Location of the report output path of the automation tests')
+  }
+  stages {
+    stage('Start build') {
+      steps {
+        bat 'Jenkins\\Build\\01_StartBuild.bat'
+      }
+    }
+    stage('Compile scripts') {
+      steps {
+        bat 'Jenkins\\Build\\02_CompileScripts.bat'
+      }
+    }
+    stage('Build files') {
+      steps {
+        bat 'Jenkins\\Build\\03_BuildFiles.bat'
+      }
+    }
+    stage('Cook project') {
+      steps {
+        bat 'Jenkins\\Build\\04_CookProject.bat'
+      }
+    }
+    stage('Run tests') {
+      steps {
+        bat 'Jenkins\\Test\\RunMyTests.bat'
+      }
+    }
+  }
+/*
+  post {
+    success {
+      bat 'Jenkins\\Build\\05_Archive.bat'
+    }
+
+    cleanup {
+      cleanWs()
+    }
+  }
+*/
+}

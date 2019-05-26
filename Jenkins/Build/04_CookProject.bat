@@ -1,0 +1,1 @@
+"%UE_LOC%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="%JENKINS_WS%\GetaGameJam7.uproject" -noP4 -platform=Win64 -clientconfig=Development -cook -allmaps -NoCompile -stage -pak -archive -archivedirectory="%JENKINS_BUILD%"
