@@ -36,7 +36,9 @@ def getJUnitXMLContentFromJSON( String json_content ) {
 }
 
 pipeline {
-  agent any
+  agent {
+    label 'wcn'
+  }
   parameters {
     string(name: 'JENKINS_WS', defaultValue: 'C:\\Program Files (x86)\\Jenkins\\workspace\\Potter', description: 'Location of the Jenkins workspace folder of this project')
     string(name: 'JENKINS_BUILD', defaultValue: 'C:\\Program Files (x86)\\Jenkins\\workspace\\Builds\\Potter', description: 'Location of the Jenkins build folder of this project')
