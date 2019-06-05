@@ -1,0 +1,9 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.PotterTests.cpp.obj": [
+			"PotterTests.cpp.obj",
+			"GameTest.cpp.obj"
+		]
+	}
+}

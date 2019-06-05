@@ -1,0 +1,13 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UE4Editor-PotterTests.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:\Users\zanni\Desktop\Potter\Intermediate\Build\Win64\GetaGameJam7Editor\Development\Engine\SharedPCH.Engine.h.obj"
+"C:\Users\zanni\Desktop\Potter\Plugins\PotterTests\Intermediate\Build\Win64\UE4Editor\Development\PotterTests\Module.PotterTests.cpp.obj"
+"C:\Users\zanni\Desktop\Potter\Plugins\PotterTests\Intermediate\Build\Win64\UE4Editor\Development\PotterTests\Default.rc2.res"
+/OUT:"C:\Users\zanni\Desktop\Potter\Plugins\PotterTests\Intermediate\Build\Win64\UE4Editor\Development\PotterTests\UE4Editor-PotterTests.lib"
+/INCLUDE:IMPLEMENT_MODULE_PotterTests
