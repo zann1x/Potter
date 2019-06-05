@@ -70,7 +70,7 @@ pipeline {
     stage('Run tests') {
       steps {
         bat 'Jenkins\\Test\\RunMyTests.bat'
-        convertUnitTestsReport()
+        //convertUnitTestsReport()
       }
     }
   }
