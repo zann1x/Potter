@@ -214,3 +214,17 @@ void AGetaGameJam7Character::UpdateCharacter(float DeltaSeconds)
 		}
 	}
 }
+
+/////////////////////////////
+// AUTOMATION TEST METHODS //
+/////////////////////////////
+
+void AGetaGameJam7Character::AutomationKill()
+{
+	Kill();
+}
+
+bool AGetaGameJam7Character::AutomationIsDead()
+{
+	return AnimState == AnimationState::DEAD;
+}
