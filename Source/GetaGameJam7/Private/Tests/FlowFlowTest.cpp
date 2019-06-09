@@ -26,7 +26,7 @@ UWorld* GetTestWorld()
 	return nullptr;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(GameTest, "PotterTests.GameNative", EAutomationTestFlags::EditorContext | EAutomationTestFlags::ClientContext | EAutomationTestFlags::ProductFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(GameTest, "PotterTests.Game", EAutomationTestFlags::EditorContext | EAutomationTestFlags::ClientContext | EAutomationTestFlags::ProductFilter)
 
 bool GameTest::RunTest(const FString& Parameters)
 {
@@ -39,7 +39,7 @@ bool GameTest::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FlowFlowTest, "PotterTests.FlowFlowNative", EAutomationTestFlags::EditorContext | EAutomationTestFlags::ClientContext | EAutomationTestFlags::ProductFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FlowFlowTest, "PotterTests.FlowFlow", EAutomationTestFlags::EditorContext | EAutomationTestFlags::ClientContext | EAutomationTestFlags::ProductFilter)
 
 bool FlowFlowTest::RunTest(const FString& Parameters)
 {
@@ -47,7 +47,7 @@ bool FlowFlowTest::RunTest(const FString& Parameters)
 	UWorld* World = GetTestWorld();
 	AGetaGameJam7Character* Character = Cast<AGetaGameJam7Character>(World->GetFirstPlayerController()->GetCharacter());
 	
-	Character->AutomationKill();
+	Character->Kill();
 	ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(1.0f));
 	TestTrue("Character is dead", Character->AutomationIsDead());
 	

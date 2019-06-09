@@ -63,14 +63,6 @@ protected:
 
 	const float MaxWaterLevel = 1.0f;
 
-	// BlueprintNativeEvent to kill the player
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category=FlowFlow)
-	void Kill();
-
-	// BlueprintNativeEvent to execute when the player has won
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = FlowFlow)
-	void Win();
-
 	// BlueprintNativeEvent to reset all player variables
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = FlowFlow)
 	void Reset() override;
@@ -101,9 +93,17 @@ public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
-	/* Methods for automation tests */
-public:
-	void AutomationKill();
+	// BlueprintNativeEvent to kill the player
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = FlowFlow)
+	void Kill();
 
+	// BlueprintNativeEvent to execute when the player has won
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = FlowFlow)
+	void Win();
+
+	/////////////////////////////
+	// AUTOMATION TEST METHODS //
+	/////////////////////////////
+public:
 	bool AutomationIsDead();
 };
