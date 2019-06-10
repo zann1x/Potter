@@ -17,11 +17,6 @@ class GETAGAMEJAM7_API APPottie : public AActor
 	UFUNCTION()
 	void OnBeginOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-protected:
-	// BlueprintNativeEvent to reset all player variables
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Pottie)
-	void Reset() override;
-
 public:	
 	// Sets default values for this actor's properties
 	APPottie();
@@ -33,4 +28,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	// BlueprintNativeEvent to reset all player variables
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Pottie)
+	void Reset() override;
 };

@@ -76,8 +76,42 @@ AGetaGameJam7Character::AGetaGameJam7Character()
 	WaterLevel = MaxWaterLevel;
 }
 
+bool AGetaGameJam7Character::IsDead()
+{
+	return AnimState == AnimationState::DEAD;
+}
+
+void AGetaGameJam7Character::Kill_Implementation()
+{
+	AnimState = AnimationState::DEAD;
+	DisableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetCharacter()->GetCharacterMovement()->Velocity = FVector(0.0f, 0.0f, 0.0f);
+	UpdateAnimation();
+}
+
+void AGetaGameJam7Character::Win_Implementation()
+{
+	AnimState = AnimationState::POTTED;
+	DisableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetCharacter()->GetCharacterMovement()->Velocity = FVector(0.0f, 0.0f, 0.0f);
+	UpdateAnimation();
+}
+
+void AGetaGameJam7Character::Reset_Implementation()
+{
+	// Don't call the super method here to avoid weird side effects of the default's engine implementation
+
+	WaterLevel = MaxWaterLevel;
+	AnimState = AnimationState::IDLE;
+	EnableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	TArray<AActor*> Actors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), Actors);
+	SetActorLocation(Actors[0]->GetActorLocation(), false, nullptr, ETeleportType::ResetPhysics);
+	SetActorTickEnabled(true);
+}
+
 //////////////////////////////////////////////////////////////////////////
-// Animation
+// Animation / Updates
 
 void AGetaGameJam7Character::UpdateAnimation()
 {
@@ -115,91 +149,10 @@ void AGetaGameJam7Character::UpdateAnimation()
 	}
 }
 
-void AGetaGameJam7Character::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-
-	UpdateCharacter(DeltaSeconds);	
-}
-
-
-//////////////////////////////////////////////////////////////////////////
-// Input
-
-void AGetaGameJam7Character::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
-{
-	// Note: the 'Jump' action and the 'MoveRight' axis are bound to actual keys/buttons/sticks in DefaultInput.ini (editable from Project Settings..Input)
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AGetaGameJam7Character::MoveRight);
-
-	PlayerInputComponent->BindTouch(IE_Pressed, this, &AGetaGameJam7Character::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &AGetaGameJam7Character::TouchStopped);
-}
-
-void AGetaGameJam7Character::MoveRight(float Value)
-{
-	/*UpdateChar();*/
-
-	// Apply the input to the character motion
-	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
-}
-
-void AGetaGameJam7Character::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	// Jump on any touch
-	Jump();
-}
-
-void AGetaGameJam7Character::TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	// Cease jumping once touch stopped
-	StopJumping();
-}
-
-void AGetaGameJam7Character::Kill_Implementation()
-{
-	AnimState = AnimationState::DEAD;
-	DisableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetCharacter()->GetCharacterMovement()->Velocity = FVector(0.0f, 0.0f, 0.0f);
-	UpdateAnimation();
-}
-
-void AGetaGameJam7Character::Win_Implementation()
-{
-	AnimState = AnimationState::POTTED;
-	DisableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetCharacter()->GetCharacterMovement()->Velocity = FVector(0.0f, 0.0f, 0.0f);
-	UpdateAnimation();
-}
-
-void AGetaGameJam7Character::Reset_Implementation()
-{
-	WaterLevel = MaxWaterLevel;
-	AnimState = AnimationState::IDLE;
-	EnableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	TArray<AActor*> Actors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), Actors);
-	SetActorLocation(Actors[0]->GetActorLocation(), false, nullptr, ETeleportType::ResetPhysics);
-	SetActorTickEnabled(true);
-}
-
 void AGetaGameJam7Character::UpdateCharacter(float DeltaSeconds)
 {
-	if (AnimState != AnimationState::DEAD)
-	{
-		WaterLevel -= (DeltaSeconds / 15.0f);
-		if (WaterLevel <= 0.0f)
-		{
-			Kill();
-		}
-	}
-	
-	// Update animation to match the motion
-	UpdateAnimation();
-
 	// Now setup the rotation of the controller based on the direction we are travelling
-	const FVector PlayerVelocity = GetVelocity();	
+	const FVector PlayerVelocity = GetVelocity();
 	float TravelDirection = PlayerVelocity.X;
 	// Set the rotation so that the character faces his direction of travel.
 	if (Controller != nullptr)
@@ -215,11 +168,52 @@ void AGetaGameJam7Character::UpdateCharacter(float DeltaSeconds)
 	}
 }
 
+void AGetaGameJam7Character::UpdateWaterLevel(float DeltaSeconds)
+{
+	if (AnimState != AnimationState::DEAD)
+	{
+		WaterLevel -= (DeltaSeconds / 15.0f);
+		if (WaterLevel <= 0.0f)
+		{
+			Kill();
+		}
+	}
+}
+
+void AGetaGameJam7Character::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// Update health level of the character
+	UpdateWaterLevel(DeltaSeconds);
+
+	// Update animation to match the motion
+	UpdateAnimation();
+
+	// Update the facing direction of the character
+	UpdateCharacter(DeltaSeconds);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// Input
+
+void AGetaGameJam7Character::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+{
+	// Note: the 'Jump' action and the 'MoveRight' axis are bound to actual keys/buttons/sticks in DefaultInput.ini (editable from Project Settings..Input)
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AGetaGameJam7Character::MoveRight);
+}
+
+void AGetaGameJam7Character::MoveRight(float Value)
+{
+	/*UpdateChar();*/
+
+	// Apply the input to the character motion
+	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
+}
+
 /////////////////////////////
 // AUTOMATION TEST METHODS //
 /////////////////////////////
-
-bool AGetaGameJam7Character::AutomationIsDead()
-{
-	return AnimState == AnimationState::DEAD;
-}

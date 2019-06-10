@@ -49,5 +49,7 @@ void APPottie::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* Other
 
 void APPottie::Reset_Implementation()
 {
+	// Don't call the super method here to avoid weird side effects of the default's engine implementation
+
 	SetActorHiddenInGame(false);
 }

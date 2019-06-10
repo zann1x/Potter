@@ -63,10 +63,6 @@ protected:
 
 	const float MaxWaterLevel = 1.0f;
 
-	// BlueprintNativeEvent to reset all player variables
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = FlowFlow)
-	void Reset() override;
-
 	/** Called to choose the correct animation to play based on the character's movement state */
 	void UpdateAnimation();
 
@@ -75,11 +71,7 @@ protected:
 
 	void UpdateCharacter(float DeltaSeconds);
 
-	/** Handle touch inputs. */
-	void TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location);
-
-	/** Handle touch stop event. */
-	void TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location);
+	void UpdateWaterLevel(float DeltaSeconds);
 
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
@@ -93,6 +85,12 @@ public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
+	bool IsDead();
+
+	// BlueprintNativeEvent to reset all player variables
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = FlowFlow)
+	void Reset() override;
+
 	// BlueprintNativeEvent to kill the player
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = FlowFlow)
 	void Kill();
@@ -104,6 +102,5 @@ public:
 	/////////////////////////////
 	// AUTOMATION TEST METHODS //
 	/////////////////////////////
-public:
-	bool AutomationIsDead();
+
 };

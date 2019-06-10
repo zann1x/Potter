@@ -16,7 +16,6 @@ void AGetaGameJam7GameMode::Reset_Implementation()
 {
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetInputMode(FInputModeGameOnly());
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->bShowMouseCursor = false;
-	//UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)->Reset();
 
 	TArray<AActor*> Actors;
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName(TEXT("GameActor")), Actors);
