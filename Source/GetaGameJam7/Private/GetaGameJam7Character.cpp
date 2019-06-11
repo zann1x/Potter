@@ -76,11 +76,6 @@ AGetaGameJam7Character::AGetaGameJam7Character()
 	WaterLevel = MaxWaterLevel;
 }
 
-bool AGetaGameJam7Character::IsDead()
-{
-	return AnimState == AnimationState::DEAD;
-}
-
 void AGetaGameJam7Character::Kill_Implementation()
 {
 	AnimState = AnimationState::DEAD;
@@ -217,3 +212,8 @@ void AGetaGameJam7Character::MoveRight(float Value)
 /////////////////////////////
 // AUTOMATION TEST METHODS //
 /////////////////////////////
+
+bool AGetaGameJam7Character::AutomationIsDead()
+{
+	return AnimState == AnimationState::DEAD;
+}

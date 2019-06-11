@@ -37,7 +37,7 @@ void FlowFlowTest::Define()
 		AsyncTask(ENamedThreads::GameThread, [this]()
 		{
 			AGetaGameJam7Character* Character = Cast<AGetaGameJam7Character>(World->GetFirstPlayerController()->GetCharacter());
-			TestTrue("Character is dead", Character->IsDead());
+			TestTrue("Character is dead", Character->AutomationIsDead());
 		});
 
 		TestDone.Execute();
@@ -48,7 +48,7 @@ void FlowFlowTest::Define()
 	//	AGetaGameJam7Character* Character = Cast<AGetaGameJam7Character>(World->GetFirstPlayerController()->GetCharacter());
 	//	Character->Kill();
 	//	ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(1.0f));
-	//	TestTrue("Character is dead", Character->IsDead());
+	//	TestTrue("Character is dead", Character->AutomationIsDead());
 	//});
 
 	AfterEach([this]()

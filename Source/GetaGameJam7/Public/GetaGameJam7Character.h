@@ -85,8 +85,6 @@ public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
-	bool IsDead();
-
 	// BlueprintNativeEvent to reset all player variables
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = FlowFlow)
 	void Reset() override;
@@ -102,5 +100,5 @@ public:
 	/////////////////////////////
 	// AUTOMATION TEST METHODS //
 	/////////////////////////////
-
+	bool AutomationIsDead();
 };
