@@ -40,10 +40,8 @@ void APPottie::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* Other
 	ACharacter* Character = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	if (OtherActor == Character)
 	{
-		SetActorHiddenInGame(true);
-
 		AGetaGameJam7Character* FlowFlow = Cast<AGetaGameJam7Character>(Character);
-		FlowFlow->Win();
+		DoThePot(FlowFlow);
 	}
 }
 
@@ -52,4 +50,16 @@ void APPottie::Reset_Implementation()
 	// Don't call the super method here to avoid weird side effects of the default's engine implementation
 
 	SetActorHiddenInGame(false);
+}
+
+void APPottie::DoThePot(AGetaGameJam7Character* Character)
+{
+	SetActorHiddenInGame(true);
+
+	Character->Win();
+}
+
+void APPottie::AutomationDoThePot(AGetaGameJam7Character* Character)
+{
+	DoThePot(Character);
 }

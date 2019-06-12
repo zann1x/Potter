@@ -7,7 +7,7 @@
 #include "GetaGameJam7Character.generated.h"
 
 UENUM(BlueprintType)
-enum class AnimationState : uint8
+enum class EAnimationState : uint8
 {
 	IDLE	UMETA(DisplayName = "Idle"),
 	RUNNING	UMETA(DisplayName = "Running"),
@@ -39,7 +39,7 @@ class AGetaGameJam7Character : public APaperCharacter
 	virtual void Tick(float DeltaSeconds) override;
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
-	AnimationState AnimState;
+	EAnimationState AnimState;
 
 	// The animation to play while running around
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Animations)
@@ -101,4 +101,8 @@ public:
 	// AUTOMATION TEST METHODS //
 	/////////////////////////////
 	bool AutomationIsDead();
+	bool AutomationIsIdle();
+	bool AutomationIsPotted();
+
+	bool AutomationHasFullHealth();
 };

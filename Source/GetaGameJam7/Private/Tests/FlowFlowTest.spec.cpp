@@ -17,6 +17,7 @@ END_DEFINE_SPEC(FlowFlowTest)
 
 void FlowFlowTest::Define()
 {
+	// PRE TEST
 	BeforeEach([this]()
 	{
 		AutomationOpenMap(TEXT("/Game/Maps/Map0"));
@@ -24,6 +25,7 @@ void FlowFlowTest::Define()
 		TestNotNull("World is not null", World);
 	});	
 	
+	// TESTS
 	LatentIt("Test Kill Method", EAsyncExecution::ThreadPool, [this](const FDoneDelegate TestDone)
 	{
 		AsyncTask(ENamedThreads::GameThread, [this]()
@@ -32,7 +34,7 @@ void FlowFlowTest::Define()
 			Character->Kill();
 		});
 
-		FPlatformProcess::Sleep((0.5f));
+		FPlatformProcess::Sleep((0.2f));
 
 		AsyncTask(ENamedThreads::GameThread, [this]()
 		{
@@ -43,14 +45,40 @@ void FlowFlowTest::Define()
 		TestDone.Execute();
 	});
 
-	//It("Test Kill Method", [this]()
-	//{
-	//	AGetaGameJam7Character* Character = Cast<AGetaGameJam7Character>(World->GetFirstPlayerController()->GetCharacter());
-	//	Character->Kill();
-	//	ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(1.0f));
-	//	TestTrue("Character is dead", Character->AutomationIsDead());
-	//});
+	It("Test Reset Method", [this]()
+	{
+		AGetaGameJam7Character* Character = Cast<AGetaGameJam7Character>(World->GetFirstPlayerController()->GetCharacter());
+		Character->Reset();
 
+		TestTrue("Character is set to idle", Character->AutomationIsIdle());
+		TestTrue("Character has full health", Character->AutomationHasFullHealth());
+
+		TArray<AActor*> Actors;
+		UGameplayStatics::GetAllActorsOfClass(World, APlayerStart::StaticClass(), Actors);
+		APlayerStart* PlayerStart = Cast<APlayerStart>(Actors[0]);
+		TestTrue("Character is at start position", Character->GetActorLocation() == PlayerStart->GetActorLocation());
+	});
+
+	LatentIt("Test Win Method", EAsyncExecution::ThreadPool, [this](const FDoneDelegate TestDone)
+	{
+		AsyncTask(ENamedThreads::GameThread, [this]()
+		{
+			AGetaGameJam7Character* Character = Cast<AGetaGameJam7Character>(World->GetFirstPlayerController()->GetCharacter());
+			Character->Win();
+		});
+		
+		FPlatformProcess::Sleep(0.2f);
+
+		AsyncTask(ENamedThreads::GameThread, [this]()
+		{
+			AGetaGameJam7Character* Character = Cast<AGetaGameJam7Character>(World->GetFirstPlayerController()->GetCharacter());
+			TestTrue("Character is in potted state", Character->AutomationIsPotted());
+		});
+
+		TestDone.Execute();
+	});
+
+	// AFTER TEST
 	AfterEach([this]()
 	{
 		FMyTestUtils::Exit();

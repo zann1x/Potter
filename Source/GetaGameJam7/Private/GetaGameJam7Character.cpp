@@ -78,7 +78,7 @@ AGetaGameJam7Character::AGetaGameJam7Character()
 
 void AGetaGameJam7Character::Kill_Implementation()
 {
-	AnimState = AnimationState::DEAD;
+	AnimState = EAnimationState::DEAD;
 	DisableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetCharacter()->GetCharacterMovement()->Velocity = FVector(0.0f, 0.0f, 0.0f);
 	UpdateAnimation();
@@ -86,7 +86,7 @@ void AGetaGameJam7Character::Kill_Implementation()
 
 void AGetaGameJam7Character::Win_Implementation()
 {
-	AnimState = AnimationState::POTTED;
+	AnimState = EAnimationState::POTTED;
 	DisableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetCharacter()->GetCharacterMovement()->Velocity = FVector(0.0f, 0.0f, 0.0f);
 	UpdateAnimation();
@@ -97,7 +97,7 @@ void AGetaGameJam7Character::Reset_Implementation()
 	// Don't call the super method here to avoid weird side effects of the default's engine implementation
 
 	WaterLevel = MaxWaterLevel;
-	AnimState = AnimationState::IDLE;
+	AnimState = EAnimationState::IDLE;
 	EnableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	TArray<AActor*> Actors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), Actors);
@@ -113,27 +113,27 @@ void AGetaGameJam7Character::UpdateAnimation()
 	const float PlayerSpeedSqr = GetVelocity().SizeSquared();
 
 	// Are we moving or standing still?
-	if (AnimState != AnimationState::DEAD && AnimState != AnimationState::POTTED)
+	if (AnimState != EAnimationState::DEAD && AnimState != EAnimationState::POTTED)
 	{
 		if (PlayerSpeedSqr > 0.0f)
-			AnimState = AnimationState::RUNNING;
+			AnimState = EAnimationState::RUNNING;
 		else
-			AnimState = AnimationState::IDLE;
+			AnimState = EAnimationState::IDLE;
 	}
 
 	UPaperFlipbook* DesiredAnimation = nullptr;
 	switch (AnimState)
 	{
-	case AnimationState::IDLE:
+	case EAnimationState::IDLE:
 		DesiredAnimation = IdleAnimation;
 		break;
-	case AnimationState::RUNNING:
+	case EAnimationState::RUNNING:
 		DesiredAnimation = RunningAnimation;
 		break;
-	case AnimationState::DEAD:
+	case EAnimationState::DEAD:
 		DesiredAnimation = DeadAnimation;
 		break;
-	case AnimationState::POTTED:
+	case EAnimationState::POTTED:
 		DesiredAnimation = WinAnimation;
 		break;
 	}
@@ -165,7 +165,7 @@ void AGetaGameJam7Character::UpdateCharacter(float DeltaSeconds)
 
 void AGetaGameJam7Character::UpdateWaterLevel(float DeltaSeconds)
 {
-	if (AnimState != AnimationState::DEAD)
+	if (AnimState != EAnimationState::DEAD)
 	{
 		WaterLevel -= (DeltaSeconds / 15.0f);
 		if (WaterLevel <= 0.0f)
@@ -215,5 +215,20 @@ void AGetaGameJam7Character::MoveRight(float Value)
 
 bool AGetaGameJam7Character::AutomationIsDead()
 {
-	return AnimState == AnimationState::DEAD;
+	return AnimState == EAnimationState::DEAD;
+}
+
+bool AGetaGameJam7Character::AutomationIsIdle()
+{
+	return AnimState == EAnimationState::IDLE;
+}
+
+bool AGetaGameJam7Character::AutomationIsPotted()
+{
+	return AnimState == EAnimationState::POTTED;
+}
+
+bool AGetaGameJam7Character::AutomationHasFullHealth()
+{
+	return WaterLevel == MaxWaterLevel;
 }
