@@ -1,1 +1,1 @@
-"%UE_LOC%\Engine\Binaries\Win64\UE4Editor-Cmd.exe" "%JENKINS_WS%\GetaGameJam7.uproject" -ExecCmds="Automation RunTests PotterTests; Quit" -unattended -nopause -testexit="Automation Test Queue Empty" -NullRHI -log -log=GGJ7_AutomationTestOutput.log -ReportOutputPath="%RO_PATH%"
+"%UE_LOC%\Engine\Binaries\Win64\UE4Editor-Cmd.exe" "%JENKINS_WS%\GetaGameJam7.uproject" -ExecCmds="Automation RunTests PotterTests; Quit" -unattended -nopause -testexit="Automation Test Queue Empty" -NullRHI -log -log=GGJ7_AutomationTestOutput.log -ReportOutputPath="%report_output_path%"

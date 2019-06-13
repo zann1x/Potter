@@ -2,14 +2,15 @@ import groovy.json.JsonSlurper
 import groovy.xml.MarkupBuilder
 
 def convertUnitTestsReport() {
-    def json = readFile file: "${RO_PATH}\\index.json", encoding: "UTF-8"
+    def json = readFile file: "${env.report_output_path}\\index.json", encoding: "UTF-8"
     // Needed because the JSON is encoded in UTF-8 with BOM
-
     json = json.replace( "\uFEFF", "" );
 
     def xml_content = getJUnitXMLContentFromJSON( json )
 
-    writeFile file: "${RO_PATH}\\junit.xml", text: xml_content.toString()
+    writeFile file: "${env.report_output_path}\\junit.xml", text: xml_content.toString()
+
+    junit "Automation\\TestReportOutput\\junit.xml"
 }
 
 @NonCPS
@@ -25,8 +26,10 @@ def getJUnitXMLContentFromJSON( String json_content ) {
     builder.testsuite( tests: j.succeeded + j.failed, failures: j.failed, time: j.totalDuration ) {
         for ( test in j.tests ) {
             builder.testcase( name: test.testDisplayName, classname: test.fullTestPath, status: test.state ) {
-                for ( entry in test.entries ) { 
-                    builder.failure( message: entry.event.message, type: entry.event.type, entry.filename + " " + entry.lineNumber )
+                for ( entry in test.entries ) {
+                    if (entry.event.type != "Info") {
+                      builder.failure( message: entry.event.message, type: entry.event.type, entry.filename + " " + entry.lineNumber )
+                    }
                 }
             }
         }
@@ -39,13 +42,14 @@ pipeline {
   agent {
     label 'wcn'
   }
+
   parameters {
-    string(name: 'JENKINS_WS', defaultValue: 'C:\\Program Files (x86)\\Jenkins\\workspace\\Potter', description: 'Location of the Jenkins workspace folder of this project')
-    string(name: 'JENKINS_BUILD', defaultValue: 'C:\\Program Files (x86)\\Jenkins\\workspace\\Builds\\Potter', description: 'Location of the Jenkins build folder of this project')
-    string(name: 'JENKINS_ARCHIVE', defaultValue: 'C:\\Program Files (x86)\\Jenkins\\workspace\\Archive\\Potter', description: 'Location of the Jenkins archive folder of this project')
+    string(name: 'JENKINS_WS', defaultValue: 'C:\\Users\\zanni\\Desktop\\Jenkins\\workspace\\Potter', description: 'Location of the Jenkins workspace folder of this project')
+    string(name: 'JENKINS_BUILD', defaultValue: 'C:\\Users\\zanni\\Desktop\\Jenkins\\workspace\\Builds\\Potter', description: 'Location of the Jenkins build folder of this project')
+    string(name: 'JENKINS_ARCHIVE', defaultValue: 'C:\\Users\\zanni\\Desktop\\Jenkins\\workspace\\Archive\\Potter', description: 'Location of the Jenkins archive folder of this project')
     string(name: 'UE_LOC', defaultValue: 'C:\\Program Files\\Epic Games\\UE_4.22', description: 'Location of the Unreal Engine installation')
-    string(name: 'RO_PATH', defaultValue: 'C:\\Program Files (x86)\\Jenkins\\workspace\\Test\\Automation\\TestReportOutput', description: 'Location of the report output path of the automation tests')
   }
+
   stages {
     stage('Start build') {
       steps {
@@ -69,13 +73,17 @@ pipeline {
     }
     stage('Run tests') {
       steps {
+        script {
+          env.report_output_path = "${params.JENKINS_WS}\\Automation\\TestReportOutput"
+        }
         bat 'Jenkins\\Test\\RunUnitTests.bat'
-        //convertUnitTestsReport()
+        convertUnitTestsReport()
         bat 'Jenkins\\Test\\RunFunctionalTests.bat'
+        convertUnitTestsReport()
       }
     }
   }
-/*
+
   post {
     success {
       bat 'Jenkins\\Build\\05_Archive.bat'
@@ -85,5 +93,4 @@ pipeline {
       cleanWs()
     }
   }
-*/
 }
