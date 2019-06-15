@@ -105,6 +105,16 @@ void AGetaGameJam7Character::Reset_Implementation()
 	SetActorTickEnabled(true);
 }
 
+float AGetaGameJam7Character::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	WaterLevel -= DamageAmount;
+	if (WaterLevel <= 0.0f)
+	{
+		Kill();
+	}
+	return DamageAmount;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Animation / Updates
 

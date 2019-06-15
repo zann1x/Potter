@@ -37,10 +37,5 @@ void APLava::Tick(float DeltaTime)
 
 void APLava::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	ACharacter* Character = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	if (OtherActor == Character)
-	{
-		AGetaGameJam7Character* FlowFlow = Cast<AGetaGameJam7Character>(Character);
-		FlowFlow->Kill();
-	}
+	OtherActor->TakeDamage(500.0f, FDamageEvent(), nullptr, this);
 }

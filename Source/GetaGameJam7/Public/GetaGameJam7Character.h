@@ -85,6 +85,8 @@ public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 	// BlueprintNativeEvent to reset all player variables
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = FlowFlow)
 	void Reset() override;
