@@ -2,11 +2,8 @@
 
 
 #include "PLava.h"
-#include "GetaGameJam7Character.h"
 #include "PaperSpriteComponent.h"
 #include "Components/PrimitiveComponent.h"
-#include "Engine/World.h"
-#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APLava::APLava()

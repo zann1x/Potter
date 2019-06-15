@@ -7,7 +7,7 @@
 #include "GetaGameJam7Character.generated.h"
 
 UENUM(BlueprintType)
-enum class EAnimationState : uint8
+enum class ECharacterAnimationState : uint8
 {
 	IDLE	UMETA(DisplayName = "Idle"),
 	RUNNING	UMETA(DisplayName = "Running"),
@@ -39,35 +39,39 @@ class AGetaGameJam7Character : public APaperCharacter
 	virtual void Tick(float DeltaSeconds) override;
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
-	EAnimationState AnimState;
+	ECharacterAnimationState AnimState;
 
 	// The animation to play while running around
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Animations)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Animations)
 	class UPaperFlipbook* RunningAnimation;
 
 	// The animation to play while idle (standing still)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animations)
 	class UPaperFlipbook* IdleAnimation;
 
 	// The animation to play when dead
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animations)
 	class UPaperFlipbook* DeadAnimation;
 
 	// The animation to play when the game is won
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animations)
 	class UPaperFlipbook* WinAnimation;
 
 	// The water level the flower is currently at
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FlowFlow)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FlowFlow)
 	float WaterLevel;
 
+public:
 	const float MaxWaterLevel = 1.0f;
 
+protected:
 	/** Called to choose the correct animation to play based on the character's movement state */
 	void UpdateAnimation();
 
 	/** Called for side to side input */
 	void MoveRight(float Value);
+
+	void UpdateAnimationState();
 
 	void UpdateCharacter(float DeltaSeconds);
 
@@ -85,6 +89,13 @@ public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
+	FORCEINLINE const float GetWaterLevel() const { return WaterLevel; }
+
+	const bool IsIdle() const;
+	const bool IsDead() const;
+	const bool IsPotted() const;
+	const bool IsRunning() const;
+
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	// BlueprintNativeEvent to reset all player variables
@@ -98,13 +109,4 @@ public:
 	// BlueprintNativeEvent to execute when the player has won
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = FlowFlow)
 	void Win();
-
-	/////////////////////////////
-	// AUTOMATION TEST METHODS //
-	/////////////////////////////
-	bool AutomationIsDead();
-	bool AutomationIsIdle();
-	bool AutomationIsPotted();
-
-	bool AutomationHasFullHealth();
 };

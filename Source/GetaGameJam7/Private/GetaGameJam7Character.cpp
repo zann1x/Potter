@@ -1,6 +1,7 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "GetaGameJam7Character.h"
+#include "PaperFlipbook.h"
 #include "PaperFlipbookComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -78,7 +79,7 @@ AGetaGameJam7Character::AGetaGameJam7Character()
 
 void AGetaGameJam7Character::Kill_Implementation()
 {
-	AnimState = EAnimationState::DEAD;
+	AnimState = ECharacterAnimationState::DEAD;
 	DisableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetCharacter()->GetCharacterMovement()->Velocity = FVector(0.0f, 0.0f, 0.0f);
 	UpdateAnimation();
@@ -86,7 +87,7 @@ void AGetaGameJam7Character::Kill_Implementation()
 
 void AGetaGameJam7Character::Win_Implementation()
 {
-	AnimState = EAnimationState::POTTED;
+	AnimState = ECharacterAnimationState::POTTED;
 	DisableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetCharacter()->GetCharacterMovement()->Velocity = FVector(0.0f, 0.0f, 0.0f);
 	UpdateAnimation();
@@ -97,7 +98,7 @@ void AGetaGameJam7Character::Reset_Implementation()
 	// Don't call the super method here to avoid weird side effects of the default's engine implementation
 
 	WaterLevel = MaxWaterLevel;
-	AnimState = EAnimationState::IDLE;
+	AnimState = ECharacterAnimationState::IDLE;
 	EnableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	TArray<AActor*> Actors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), Actors);
@@ -107,6 +108,8 @@ void AGetaGameJam7Character::Reset_Implementation()
 
 float AGetaGameJam7Character::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
 	WaterLevel -= DamageAmount;
 	if (WaterLevel <= 0.0f)
 	{
@@ -115,35 +118,44 @@ float AGetaGameJam7Character::TakeDamage(float DamageAmount, struct FDamageEvent
 	return DamageAmount;
 }
 
+const bool AGetaGameJam7Character::IsIdle() const
+{ 
+	return GetSprite()->GetFlipbook() == IdleAnimation; 
+}
+
+const bool AGetaGameJam7Character::IsDead() const
+{ 
+	return GetSprite()->GetFlipbook() == DeadAnimation; 
+}
+
+const bool AGetaGameJam7Character::IsPotted() const
+{ 
+	return GetSprite()->GetFlipbook() == WinAnimation; 
+}
+
+const bool AGetaGameJam7Character::IsRunning() const
+{ 
+	return GetSprite()->GetFlipbook() == RunningAnimation; 
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Animation / Updates
 
 void AGetaGameJam7Character::UpdateAnimation()
 {
-	const float PlayerSpeedSqr = GetVelocity().SizeSquared();
-
-	// Are we moving or standing still?
-	if (AnimState != EAnimationState::DEAD && AnimState != EAnimationState::POTTED)
-	{
-		if (PlayerSpeedSqr > 0.0f)
-			AnimState = EAnimationState::RUNNING;
-		else
-			AnimState = EAnimationState::IDLE;
-	}
-
 	UPaperFlipbook* DesiredAnimation = nullptr;
 	switch (AnimState)
 	{
-	case EAnimationState::IDLE:
+	case ECharacterAnimationState::IDLE:
 		DesiredAnimation = IdleAnimation;
 		break;
-	case EAnimationState::RUNNING:
+	case ECharacterAnimationState::RUNNING:
 		DesiredAnimation = RunningAnimation;
 		break;
-	case EAnimationState::DEAD:
+	case ECharacterAnimationState::DEAD:
 		DesiredAnimation = DeadAnimation;
 		break;
-	case EAnimationState::POTTED:
+	case ECharacterAnimationState::POTTED:
 		DesiredAnimation = WinAnimation;
 		break;
 	}
@@ -151,6 +163,20 @@ void AGetaGameJam7Character::UpdateAnimation()
 	if (GetSprite()->GetFlipbook() != DesiredAnimation)
 	{
 		GetSprite()->SetFlipbook(DesiredAnimation);
+	}
+}
+
+void AGetaGameJam7Character::UpdateAnimationState()
+{
+	const float PlayerSpeedSqr = GetVelocity().SizeSquared();
+
+	// Are we moving or standing still?
+	if (AnimState != ECharacterAnimationState::DEAD && AnimState != ECharacterAnimationState::POTTED)
+	{
+		if (PlayerSpeedSqr > 0.0f)
+			AnimState = ECharacterAnimationState::RUNNING;
+		else
+			AnimState = ECharacterAnimationState::IDLE;
 	}
 }
 
@@ -175,7 +201,7 @@ void AGetaGameJam7Character::UpdateCharacter(float DeltaSeconds)
 
 void AGetaGameJam7Character::UpdateWaterLevel(float DeltaSeconds)
 {
-	if (AnimState != EAnimationState::DEAD)
+	if (AnimState != ECharacterAnimationState::DEAD)
 	{
 		WaterLevel -= (DeltaSeconds / 15.0f);
 		if (WaterLevel <= 0.0f)
@@ -193,6 +219,9 @@ void AGetaGameJam7Character::Tick(float DeltaSeconds)
 	UpdateWaterLevel(DeltaSeconds);
 
 	// Update animation to match the motion
+	UpdateAnimationState();
+
+	// Update the look of the character based on its animation
 	UpdateAnimation();
 
 	// Update the facing direction of the character
@@ -217,28 +246,4 @@ void AGetaGameJam7Character::MoveRight(float Value)
 
 	// Apply the input to the character motion
 	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
-}
-
-/////////////////////////////
-// AUTOMATION TEST METHODS //
-/////////////////////////////
-
-bool AGetaGameJam7Character::AutomationIsDead()
-{
-	return AnimState == EAnimationState::DEAD;
-}
-
-bool AGetaGameJam7Character::AutomationIsIdle()
-{
-	return AnimState == EAnimationState::IDLE;
-}
-
-bool AGetaGameJam7Character::AutomationIsPotted()
-{
-	return AnimState == EAnimationState::POTTED;
-}
-
-bool AGetaGameJam7Character::AutomationHasFullHealth()
-{
-	return WaterLevel == MaxWaterLevel;
 }
